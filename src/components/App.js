@@ -1,10 +1,11 @@
 import React from 'react';
 import CharacterSelector from './CharacterSelector'
-import './App.css';
+// REMOVE ROUTER FROM PACKAGE ???
+// import {BrowserRouter as Router, Route} from 'react-router-dom'
 
 function App() {
   return (
-    <div className="App">
+    <div className="mw7 center">
       <CharacterSelector />
     </div>
   );
