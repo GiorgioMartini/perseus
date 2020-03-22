@@ -12,6 +12,12 @@ code {
     monospace;
 }
 
+.episode:not(:last-child)::after {
+  padding: 0 0.5rem;
+  content: '-';
+  color: #c7c7c7;
+}
+ 
 /* Utilities */
 .flex-1 {
   flex: 1;

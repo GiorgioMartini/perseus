@@ -24,12 +24,12 @@ export const getEpisodes = async (url) => {
 // ADD CATCH ERRORS !!!
 export const getALlCharacters = async () => {
   const result = await axios.get(charactersUrl).then(({data}) => data);
+  debugger
   const formatedResult = result.results.map(item => ({
     id: item.id,
     name: item.name,
     url: item.url,
+    species: item.species,
   }));
   return formatedResult;
 }
-
-

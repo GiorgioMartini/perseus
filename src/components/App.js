@@ -5,7 +5,7 @@ import CharacterSelector from './CharacterSelector'
 
 function App() {
   return (
-    <div className="mw7 center">
+    <div className="mw7 center sans-serif bg-white black-70">
       <CharacterSelector />
     </div>
   );
