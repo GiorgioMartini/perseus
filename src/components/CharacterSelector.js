@@ -1,33 +1,27 @@
 import React, { useEffect, useState } from 'react'
-import { getALlCharacters } from '../services/rickandmorty_api'
+import { getALlCharacters, getCharacter } from '../services/rickandmorty_api'
 import { Character } from './Character'
 
 const CharacterSelector = () => {
+  // check names and if this make sense
   const [characters, setCharacters] = useState([]);
-  const [selectedCharacter, setSelectedCharacter] = useState('');
-  const [characterId, setCharacterId] = useState(null);
+  const [selectedCharacterId, setSelectedCharacterId] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchBtnIsEnabled, setSearchBtnIsEnabled] = useState(true);
+  const [character, setCharacter] = useState(null)
 
-  const handleClick = e => {
-    e.preventDefault();
-    // if (!selectedCharacter && !!searchQuery) {
-    //   alert('Ooops! You must choose a character.')
-    //   return
-    // }
-    setCharacterId(selectedCharacter);
-  }
+  useEffect(() => {
+    getALlCharacters().then(characters => setCharacters(characters))
+  }, [setCharacters]);
 
   const handleSearchByNameChange = query => {
-    // add util function for trimming and tolowercase
+    // set menu back to default when its empty
+    // also bug when switching from menu to search or viceversa state is strange, its mixed
+    const matchedCharacter = characters.find(character => character.name.toLowerCase() === query.toLowerCase().trim());
 
-    const matchedCharacter = characters
-      .find(character => character.name.toLowerCase().trim() === query.toLowerCase().trim());
-    if (matchedCharacter) {
-      setSelectedCharacter(matchedCharacter.id);
-    }
+    if (matchedCharacter) setSelectedCharacterId(matchedCharacter.id);
     setSearchQuery(query);
-
+    
     if (query.length > 0 && !matchedCharacter) {
       setSearchBtnIsEnabled(false)
     } else if (query.length > 0 && matchedCharacter) {
@@ -35,14 +29,29 @@ const CharacterSelector = () => {
     } else {
       setSearchBtnIsEnabled(true)
     }
-    
   }
 
-  useEffect(() => {
-    getALlCharacters().then(results => setCharacters(results))
-  }, [setCharacters]);
+  const handleClick = async e => {
+    e.preventDefault();
+    // if (!selectedCharacterId && !!searchQuery) {
+    //   alert('Ooops! You must choose a character.')
+    //   return
+    // }
+    // setCharacterId(selectedCharacterId);
+    if (selectedCharacterId) {
+      const chara = await getCharacter(selectedCharacterId)
+      const similarCharacters = characters
+        .filter(char => char.species === chara.species)
+        .map(item => item['name'])
 
-  console.log(characters)
+      setCharacter({
+        ...chara,
+        similarCharacters,
+      })
+    }
+  }
+
+  // console.log('characters: ', characters)
 
   return !characters
     ? null
@@ -53,35 +62,33 @@ const CharacterSelector = () => {
         <form onSubmit={handleClick}>
           <div className="flex justify-around">
             <div className={!!searchQuery ? 'o-30' : null}>
-              <label className="db tc pb2">Choose by dropdown</label>
-              <select disabled={!!searchQuery} onChange={(e) => setSelectedCharacter(e.target.value)} name="character" id="character">
+              <label className="db tc pb2">Choose by dropdown:</label>
+              <select disabled={!!searchQuery} onChange={(e) => setSelectedCharacterId(e.target.value)} name="character" id="character">
                 <option value="">Choose a characer</option>
                 {characters.map(character => (
                   <option key={character.id} value={character.id}>{character.name}</option>
                 ))}
               </select>
             </div>
-            <div>or:</div>
+            <div>or</div>
             <div>
-              <label className="db tc pb2">Type character name</label>
+              <label className="db tc pb2">Type character name:</label>
               <input
                 onChange={e => handleSearchByNameChange(e.target.value)}
                 type="text"
-                placeholder="Search by name e.g. Rick Sanchez... "
-                className="pa1 br2"
+                placeholder="e.g. Rick Sanchez "
+                className="pa1 br2 w-100"
               />
             </div>
           </div>
-          <h1>{JSON.stringify(!searchBtnIsEnabled)}</h1>
           <button
             disabled={!searchBtnIsEnabled}
             className={`br2 white b pa2 center db mv3 bn grow pointer ${searchBtnIsEnabled ? 'bg-green' : 'bg-gray'}`}
             type="submit">
             SHOW EPISODES
         </button>
-        {!searchBtnIsEnabled}
         </form>
-        {characterId && <Character characterId={characterId} />}
+        <Character character={character} />
       </div>
     )
 }
