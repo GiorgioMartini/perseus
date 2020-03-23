@@ -1,5 +1,5 @@
 import React from 'react';
-import CharacterSelector from './CharacterSelector'
+import CharacterSelector from './CharacterSelectorContainer'
 
 function App() {
   return (

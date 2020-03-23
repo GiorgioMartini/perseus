@@ -1,5 +1,5 @@
 import React from 'react'
-import CharacterSelector from '../CharacterSelector'
+import CharacterSelector from '../CharacterSelectorContainer'
 import { getALlCharacters, getCharacter } from '../../services/rickandmorty_api'
 import {render, cleanup, waitForElement, fireEvent} from '@testing-library/react';
 
@@ -44,7 +44,7 @@ beforeEach(() => {
   cleanup();
 })
 
-describe('<CharacterSelector />', () => {
+describe('<CharacterSelectorContainer />', () => {
   test('It fetches initial data correclty and populates the menu items',async () => {  
     getALlCharacters.mockImplementation(() => Promise.resolve(characters))
       const {getAllByTestId, getByTestId, queryByTestId} = render(<CharacterSelector />)
