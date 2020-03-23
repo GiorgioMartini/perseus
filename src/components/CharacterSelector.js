@@ -1,22 +1,28 @@
 import React, { useEffect, useState } from 'react'
 import { getALlCharacters, getCharacter } from '../services/rickandmorty_api'
 import { Character } from './Character'
-
+import Header from './Header'
 const CharacterSelector = () => {
-  // check names and if this make sense
-  const [characters, setCharacters] = useState([]);
-  const [selectedCharacterId, setSelectedCharacterId] = useState('');
+  const [characters, setCharacters] = useState(null);
+  const [selectedCharacterId, setSelectedCharacterId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchBtnIsEnabled, setSearchBtnIsEnabled] = useState(true);
   const [character, setCharacter] = useState(null)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
-    getALlCharacters().then(characters => setCharacters(characters))
+    const fetchData = async () => {
+      try {
+        const chars = await getALlCharacters()
+        setCharacters(chars)
+      } catch {
+        setError('Ooops there was an error fetching the characters.')
+      }
+    };
+    fetchData()
   }, [setCharacters]);
 
   const handleSearchByNameChange = query => {
-    // set menu back to default when its empty
-    // also bug when switching from menu to search or viceversa state is strange, its mixed
     const matchedCharacter = characters.find(character => character.name.toLowerCase() === query.toLowerCase().trim());
 
     if (matchedCharacter) setSelectedCharacterId(matchedCharacter.id);
@@ -33,40 +39,42 @@ const CharacterSelector = () => {
 
   const handleClick = async e => {
     e.preventDefault();
-    // if (!selectedCharacterId && !!searchQuery) {
-    //   alert('Ooops! You must choose a character.')
-    //   return
-    // }
-    // setCharacterId(selectedCharacterId);
     if (selectedCharacterId) {
-      const chara = await getCharacter(selectedCharacterId)
-      const similarCharacters = characters
-        .filter(char => char.species === chara.species)
-        .map(item => item['name'])
-
-      setCharacter({
-        ...chara,
-        similarCharacters,
-      })
+      setCharacter(null)
+      try {
+        const receivedCharacter = await getCharacter(selectedCharacterId)
+        const similarCharacters = characters
+          .filter(char => char.species === receivedCharacter.species)
+          .map(item => item['name'])
+        setCharacter({
+          ...receivedCharacter,
+          similarCharacters,
+        })
+      } catch {
+        setError('Ooops there was an error fetching character.')
+      }
     }
   }
 
-  // console.log('characters: ', characters)
 
   return !characters
-    ? null
+    ? <p data-testid="character-selector-error" className="tc b f1">{error}</p>
     : (
-      <div className="pt4">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Rick_and_Morty.svg" className="mw5 center db" alt="Rick and Morty" />
-        <p className="pt3 f4 b lh-title mt0 mb4 mb5-ns word-wrap tc">Search episodes by character</p>
+      <div data-testid="character-selector" className="pt4">
+        <Header/>
         <form onSubmit={handleClick}>
           <div className="flex justify-around">
             <div className={!!searchQuery ? 'o-30' : null}>
               <label className="db tc pb2">Choose by dropdown:</label>
-              <select disabled={!!searchQuery} onChange={(e) => setSelectedCharacterId(e.target.value)} name="character" id="character">
+              <select
+                data-testid="character-menu"
+                disabled={!!searchQuery}
+                onChange={(e) => setSelectedCharacterId(e.target.value)}
+                name="character"
+                id="character">
                 <option value="">Choose a characer</option>
                 {characters.map(character => (
-                  <option key={character.id} value={character.id}>{character.name}</option>
+                  <option data-testid="character-menu-item" key={character.id} value={character.id}>{character.name}</option>
                 ))}
               </select>
             </div>
@@ -74,6 +82,7 @@ const CharacterSelector = () => {
             <div>
               <label className="db tc pb2">Type character name:</label>
               <input
+                data-testid="searchBox"
                 onChange={e => handleSearchByNameChange(e.target.value)}
                 type="text"
                 placeholder="e.g. Rick Sanchez "
@@ -82,12 +91,14 @@ const CharacterSelector = () => {
             </div>
           </div>
           <button
+            data-testid="submit"
             disabled={!searchBtnIsEnabled}
             className={`br2 white b pa2 center db mv3 bn grow pointer ${searchBtnIsEnabled ? 'bg-green' : 'bg-gray'}`}
             type="submit">
             SHOW EPISODES
         </button>
         </form>
+        {error && <p data-testid="character-error" className="tc b f1">{error}</p>}
         <Character character={character} />
       </div>
     )
