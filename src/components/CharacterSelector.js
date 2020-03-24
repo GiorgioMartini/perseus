@@ -17,9 +17,10 @@ const CharacterSelector = ({
       <Header />
       <form onSubmit={handleClick}>
         <div className="flex justify-around">
-          <div className={!!searchQuery ? 'o-30' : null}>
+          <div className={`w5 ${!!searchQuery ? 'o-30' : null}`}>
             <label className="db tc pb2">Choose by dropdown:</label>
             <select
+              className="w-100"
               data-testid="character-menu"
               disabled={!!searchQuery}
               onChange={(e) => setSelectedCharacterId(e.target.value)}
@@ -33,8 +34,8 @@ const CharacterSelector = ({
               ))}
             </select>
           </div>
-          <div>or</div>
-          <div>
+          <div className="">or</div>
+          <div className="w5">
             <label className="db tc pb2">Type character name:</label>
             <input
               data-testid="searchBox"
