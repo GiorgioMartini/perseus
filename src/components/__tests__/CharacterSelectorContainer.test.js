@@ -45,8 +45,10 @@ beforeEach(() => {
 })
 
 describe('<CharacterSelectorContainer />', () => {
+  getALlCharacters.mockImplementation(() => Promise.resolve(characters))
+  getCharacter.mockImplementation(() => Promise.resolve(singleCharacter))
+
   test('It fetches initial data correclty and populates the menu items',async () => {  
-    getALlCharacters.mockImplementation(() => Promise.resolve(characters))
       const {getAllByTestId, getByTestId, queryByTestId} = render(<CharacterSelector />)
       await waitForElement(() => [
         expect(queryByTestId('error')).toBeFalsy(),
@@ -58,9 +60,6 @@ describe('<CharacterSelectorContainer />', () => {
   })  
 
   test('It fetches the selected charatcer and shows it on the page when using dropdopwn', async () => {
-    getALlCharacters.mockImplementation(() => Promise.resolve(characters))
-    getCharacter.mockImplementation(() => Promise.resolve(singleCharacter))
-
     const { getByTestId } = render(<CharacterSelector />)
     const characterMenu = await waitForElement(() => getByTestId('character-menu'))
     fireEvent.change(characterMenu, { target: { value: 1 }})
@@ -77,9 +76,6 @@ describe('<CharacterSelectorContainer />', () => {
   })
 
   test('It fetches the selected charatcer and shows it on the page when using searchBox', async () => {
-    getALlCharacters.mockImplementation(() => Promise.resolve(characters))
-    getCharacter.mockImplementation(() => Promise.resolve(singleCharacter))
-
     const { getByTestId } = render(<CharacterSelector />)
     const searchBox = await waitForElement(() => getByTestId('searchBox'))
     fireEvent.change(searchBox, { target: { value: 'rick sanchez' }})
